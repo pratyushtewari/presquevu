@@ -16,9 +16,10 @@
   <div id="main_container"></div>
 
   <script type='text/template' id='reminders'>
-    < header > < div class = "addnew" > + < /div>
-          <h1>Reminders</h1 > < /header>
-          <ul id="reminderslist"></ul >
+   <div id="addnewreminder">
+     Add </div>
+          <h1>Reminders</h1>
+          <ul id="reminderslist"></ul>
   </script>
 
   <script type='text/template' id='login'>
@@ -39,16 +40,22 @@
     </div>
   </script>
 
-  <script type='text/template' id='editReminders'>
-
-  <div>
-    <textarea id='note'></textarea>    
-    <textarea id='contact'></textarea>                 
-  </div>
+  <script type='text/template' id='editReminder'>
+    <div>
+      <textarea id='oldNote'></textarea>    
+      <textarea id='oldContact'></textarea> 
+      <div class="button" id="editReminderButton">Save Reminder</div>                                
+    </div>
   </script>
 
 
-
+  <script type='text/template' id='addReminder'>
+    <div>
+      <textarea id='newNote'></textarea>    
+      <textarea id='newContact'></textarea> 
+      <div class="button" id="addReminderButton">Add Reminder</div>                
+    </div>
+  </script>
 
 
   <script type="text/javascript">

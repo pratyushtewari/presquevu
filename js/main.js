@@ -23,8 +23,7 @@ function signinCallback(authResult) {
 
 app.Session.filter = "default";
 
-var reminderData =  [{"id":"1", "Title":"talk about pears","person":"jennifer"},
-{"id":"2", "Title":"talk about car","person":"pratyush"}];
+var reminderData =  [];
 
 function reminderClicked(element) {			
 			var item = {
@@ -37,6 +36,7 @@ function reminderClicked(element) {
 
 
 $(document).ready(function (){
+	var retrievedObject;
 
 		app.View.initialize = function(){
 			var template = _.template($('#login').html());
@@ -50,13 +50,17 @@ $(document).ready(function (){
 			  // Store
 			  localStorage.setItem('reminderStorage', JSON.stringify(reminderData));
 			  // Retrieve
-			  var retrievedObject = localStorage.getItem('reminderStorage');
+			  retrievedObject = JSON.parse(localStorage.getItem('reminderStorage'));
+			}
+			  /*
 			  console.log('retrievedObject: ', JSON.parse(retrievedObject));
 			  }
 			else
 			  {
 			  document.getElementById("result").innerHTML="Sorry, your browser does not support Web Storage...";
-			  }
+			  }*/
+
+
 		
 		}
 
@@ -65,23 +69,54 @@ $(document).ready(function (){
 			$('#main_container').html('');
 			$('#main_container').html(template());
 			var ul = document.getElementById("reminderslist");
-				for (var i = 0;i<reminderData.length;i++) {
+				for (var i = 0;i<retrievedObject.length;i++) {
 					var listItem = document.createElement("li");			
-					listItem.setAttribute("data-id", reminderData[i].id );
-					listItem.setAttribute("contact-person", reminderData[i].person );
+					listItem.setAttribute("data-id", retrievedObject[i].i);
+					listItem.setAttribute("contact-person", retrievedObject[i].person );
 					listItem.setAttribute("onclick", "reminderClicked(this)");
-					listItem.appendChild(document.createTextNode(reminderData[i].Title));
-					listItem.appendChild(document.createTextNode(reminderData[i].person));
+					listItem.appendChild(document.createTextNode(retrievedObject[i].note));
+					listItem.appendChild(document.createTextNode(retrievedObject[i].person));
 					ul.appendChild(listItem); 
 				}
+
+			$('#addnewreminder').click(function (){
+				app.View.addReminder();
+			});	
 		}
 
 		app.View.editReminders = function  (item) {
-			var template = _.template($('#editReminders').html());
+			var template = _.template($('#editReminder').html());
 			$('#main_container').html('');
 			$('#main_container').html(template());
-			$('#note').val(item.value);
-			$('#contact').val(item.contact);			
+			$('#oldNote').val(item.value);
+			$('#oldContact').val(item.contact);
+			$('#editReminderButton').click(function (){
+				var newNote = document.getElementById("oldNote").value;
+				var newContact = document.getElementById("oldContact").value;
+				var index = item.id;
+				// Remove the certain item from the json.
+				// NOT WORKING ..... FIND A WAY TO REMOVE OR EDIT THE ITEM INPLACE.
+				delete retrievedObject[index];
+				// Add the edited item
+				retrievedObject.push( { "id":retrievedObject.length, "note":newNote, "person":newContact});	
+				localStorage.setItem('reminderStorage', JSON.stringify(retrievedObject));	
+				app.View.renderReminders();
+			});	
+
+		}
+
+		app.View.addReminder = function  () {
+			var template = _.template($('#addReminder').html());
+			$('#main_container').html('');
+			$('#main_container').html(template());
+			$('#addReminderButton').click(function (){
+				var note = document.getElementById("newNote").value;
+				var contact = document.getElementById("newContact").value;
+				var id = retrievedObject.length;
+				retrievedObject.push( { "id":id, "note":note, "person":contact});	
+				localStorage.setItem('reminderStorage', JSON.stringify(retrievedObject));	
+				app.View.renderReminders();
+			});		
 		}
 		
 window.onload = app.View.initialize();
