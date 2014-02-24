@@ -51,17 +51,7 @@ $(document).ready(function (){
 			  localStorage.setItem('reminderStorage', JSON.stringify(reminderData));
 			  // Retrieve
 			  retrievedObject = JSON.parse(localStorage.getItem('reminderStorage'));
-			}
-			  /*
-			  console.log('retrievedObject: ', JSON.parse(retrievedObject));
-			  }
-			else
-			  {
-			  document.getElementById("result").innerHTML="Sorry, your browser does not support Web Storage...";
-			  }*/
-
-
-		
+			}			  		
 		}
 
 		app.View.renderReminders = function  () {
@@ -71,7 +61,7 @@ $(document).ready(function (){
 			var ul = document.getElementById("reminderslist");
 				for (var i = 0;i<retrievedObject.length;i++) {
 					var listItem = document.createElement("li");			
-					listItem.setAttribute("data-id", retrievedObject[i].i);
+					listItem.setAttribute("data-id", retrievedObject[i].id);
 					listItem.setAttribute("contact-person", retrievedObject[i].person );
 					listItem.setAttribute("onclick", "reminderClicked(this)");
 					listItem.appendChild(document.createTextNode(retrievedObject[i].note));
@@ -96,7 +86,8 @@ $(document).ready(function (){
 				var index = item.id;
 				// Remove the certain item from the json.
 				// NOT WORKING ..... FIND A WAY TO REMOVE OR EDIT THE ITEM INPLACE.
-				delete retrievedObject[index];
+				
+				retrievedObject.splice(index,1);
 				// Add the edited item
 				retrievedObject.push( { "id":retrievedObject.length, "note":newNote, "person":newContact});	
 				localStorage.setItem('reminderStorage', JSON.stringify(retrievedObject));	
