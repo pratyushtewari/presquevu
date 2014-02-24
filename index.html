@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="js/jquery-2.0.3.min.js"></script>
+  <script src="js/underscore-min.js"></script>
+  <script src="js/main.js"></script>
+
+<link rel="stylesheet" href="css/screen.css">
+
+
+</head>
+
+<body>
+<!-- This is the main div that we replace with different pages template in jquery -->
+  <div id="main_container"></div>
+
+  <script type='text/template' id='reminders'>
+    < header > < div class = "addnew" > + < /div>
+          <h1>Reminders</h1 > < /header>
+          <ul id="reminderslist"></ul >
+  </script>
+
+  <script type='text/template' id='login'>
+
+  <div id='cover' style="background-image: url(images/splash.png); background-repeat: no-repeat; margin-left: auto; margin-right: auto; background-position: center;">
+            
+            
+    <span id="signinButton">
+      <span
+        class="g-signin"
+        data-callback="signinCallback"
+        data-clientid="769945414073-l4tet2gt0dk9nbf2a6ki94ohr88vujvh.apps.googleusercontent.com"
+        data-cookiepolicy="single_host_origin"
+        data-requestvisibleactions="http://schemas.google.com/AddActivity"
+        data-scope="https://www.googleapis.com/auth/plus.login">
+      </span>
+    </span>
+    </div>
+  </script>
+
+  <script type='text/template' id='editReminders'>
+
+  <div>
+    <textarea id='note'></textarea>    
+    <textarea id='contact'></textarea>                 
+  </div>
+  </script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function () {
+      var po = document.createElement('script');
+      po.type = 'text/javascript';
+      po.async = true;
+      po.src = 'https://apis.google.com/js/client:plusone.js';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(po, s);
+    })();
+  </script>
+
+</body>
+
+</html
