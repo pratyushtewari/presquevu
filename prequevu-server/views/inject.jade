@@ -1,0 +1,13 @@
+doctype html
+html
+  head
+    title= title
+    script(type='text/javascript', src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js')
+    script(type='text/javascript', src='/socket.io/socket.io.js')
+    script(type='text/javascript', src='javascripts/inject.js')
+  body
+    p#currentLocation
+    input#usrId(type='text', name='usrId')
+    input#lat(type='text', name='lat')
+    input#lng(type='text', name='lng')
+    button#add(name='add', value='add') ADD

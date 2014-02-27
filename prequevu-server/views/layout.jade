@@ -1,0 +1,18 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    script(type='text/javascript', src='/socket.io/socket.io.js')
+    script(type='text/javascript', src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js')
+    script(type='text/javascrtpt', src='js/underscore_min.js')
+    script(type='text/javascript', src='client.js')    
+    script(type='text/javascript', src='/javascripts/load_start.js')
+    script(type='text/javascript', src='js/main.js')
+    link(rel='stylesheet', href='http://code.jquery.com/mobile/1.4.1/jquery.mobile.structure-1.4.1.min.css')
+    script(src='http://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.js')
+    link(rel='stylesheet', href='css/screen.css')
+    link(rel='stylesheet', href='css/presquevu.css')
+
+  body
+    block content
