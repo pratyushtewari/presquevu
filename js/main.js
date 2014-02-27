@@ -4,30 +4,52 @@ var app = app || {
 	Session : {}
 };
 
+var userIDs =  [{"person":"Ramya Mallya", "uid":"108907421997224056509"},
+					{"person":"Pratyush Tewari", "uid":"103790459059924001513"},
+					{"person":"Jennifer Morioka", "uid":"103968547566080000803"}	
+					];
+var timerRunning=false;
+var server=0;
 
-function signinCallback(authResult) {
-  if (authResult['status']['signed_in']) {
-    // Update the app to reflect a signed in user
-    // Hide the sign-in button now that the user is authorized, for example:
-    document.getElementById('signinButton').setAttribute('style', 'display: none');
-    app.View.renderReminders();
-  } else {
-    // Update the app to reflect a signed out user
-    // Possible error values:
-    //   "user_signed_out" - User is signed-out
-    //   "access_denied" - User denied access to your app
-    //   "immediate_failed" - Could not automatically log in the user
-    console.log('Sign-in state: ' + authResult['error']);
-  }
+ $('#disconnect').click(helper.disconnect);
+
+
+function printinfo(data) {
+	console.log(data);
+}
+
+function getusername (uid) {
+	//default to Ramya.
+	var username =  "";
+	for(var i = 0; i < userIDs.length; i++) {
+		if (userIDs[i].uid == uid) {
+			username = userIDs[i].person;
+			break;
+		}					
+	}
+	return username;	
+}
+
+function getuid (contact) {
+	//default to Ramya.
+	var userID =  "108907421997224056509";
+	for(var i = 0; i < userIDs.length; i++) {
+		if (userIDs[i].person.replace(/ /g,'').toLowerCase() == contact.replace(/ /g,'').toLowerCase()) {
+			userID = userIDs[i].uid;
+			break;
+		}					
+	}
+	return userID;	
 }
 
 app.Session.filter = "default";
-
+var RID;
 var reminderData =  [];
+var retrievedObject;
 
 function reminderClicked(element) {			
 			var item = {
-				value : element.innerHTML,
+				note : element.getAttribute("note"),
 				id :  element.getAttribute("data-id"),
 				contact: element.getAttribute("contact-person")
 			};		
@@ -36,9 +58,16 @@ function reminderClicked(element) {
 
 
 $(document).ready(function (){
-	var retrievedObject;
-
+	
+	
+		
 		app.View.initialize = function(){
+			app.Logic.getLocation();
+			if(!timerRunning){
+				app.Logic.startTimer();
+				timerRunning=true;
+			}
+
 			var template = _.template($('#login').html());
 			$('#main_container').html('');
 			$('#main_container').html(template());
@@ -51,24 +80,24 @@ $(document).ready(function (){
 			  localStorage.setItem('reminderStorage', JSON.stringify(reminderData));
 			  // Retrieve
 			  retrievedObject = JSON.parse(localStorage.getItem('reminderStorage'));
-			}			  		
+			}	
+			//init the reminder ID.
+			RID = retrievedObject.length;
 		}
 
 		app.View.renderReminders = function  () {
 			var template = _.template($('#reminders').html());
 			$('#main_container').html('');
 			$('#main_container').html(template());
-			var ul = document.getElementById("reminderslist");
+			// Create the list of the reminders and add it to the ul using the jQuery			
+			var listItem = '';
 				for (var i = 0;i<retrievedObject.length;i++) {
-					var listItem = document.createElement("li");			
-					listItem.setAttribute("data-id", retrievedObject[i].id);
-					listItem.setAttribute("contact-person", retrievedObject[i].person );
-					listItem.setAttribute("onclick", "reminderClicked(this)");
-					listItem.appendChild(document.createTextNode(retrievedObject[i].note));
-					listItem.appendChild(document.createTextNode(retrievedObject[i].person));
-					ul.appendChild(listItem); 
+					listItem += "<li data-id='" + retrievedObject[i].id + "' contact-person='" + retrievedObject[i].person + "' onclick='reminderClicked(this)' note='" + retrievedObject[i].note + "'>";
+					listItem += "<p id='remindernote'>" + retrievedObject[i].note + "</p>";
+					listItem += "<p id='reminderperson'>" + retrievedObject[i].person + "</p>";
+					listItem += "</li>";
 				}
-
+			$('#reminderslist').html(listItem);
 			$('#addnewreminder').click(function (){
 				app.View.addReminder();
 			});	
@@ -78,21 +107,41 @@ $(document).ready(function (){
 			var template = _.template($('#editReminder').html());
 			$('#main_container').html('');
 			$('#main_container').html(template());
-			$('#oldNote').val(item.value);
+			$('#oldNote').val(item.note);
 			$('#oldContact').val(item.contact);
 			$('#editReminderButton').click(function (){
 				var newNote = document.getElementById("oldNote").value;
 				var newContact = document.getElementById("oldContact").value;
-				var index = item.id;
+
+				var index;
+				// find the item in the array and splice it to remove from the array.
+				for(var i = 0; i < retrievedObject.length; i++) {
+					if (item.id == retrievedObject[i].id) {
+						index = i;
+						break;
+					}					
+				}	
 				// Remove the certain item from the json.
-				// NOT WORKING ..... FIND A WAY TO REMOVE OR EDIT THE ITEM INPLACE.
-				
 				retrievedObject.splice(index,1);
 				// Add the edited item
 				retrievedObject.push( { "id":retrievedObject.length, "note":newNote, "person":newContact});	
 				localStorage.setItem('reminderStorage', JSON.stringify(retrievedObject));	
 				app.View.renderReminders();
 			});	
+
+			$('#deleteReminderButton').click(function (){				
+				// find the item in the array and splice it to remove from the array.
+				for(var i = 0; i < retrievedObject.length; i++) {
+					if (item.id == retrievedObject[i].id) {
+						// Remove the certain item from the json.
+						retrievedObject.splice(i,1);
+						break;
+					}					
+				}								
+				localStorage.setItem('reminderStorage', JSON.stringify(retrievedObject));	
+				app.View.renderReminders();
+			});	
+
 
 		}
 
@@ -103,14 +152,81 @@ $(document).ready(function (){
 			$('#addReminderButton').click(function (){
 				var note = document.getElementById("newNote").value;
 				var contact = document.getElementById("newContact").value;
-				var id = retrievedObject.length;
+				var id = ++RID;
 				retrievedObject.push( { "id":id, "note":note, "person":contact});	
-				localStorage.setItem('reminderStorage', JSON.stringify(retrievedObject));	
+				localStorage.setItem('reminderStorage', JSON.stringify(retrievedObject));
+				app.Session.sendReminder(id,getuid(contact));
+				app.View.renderReminders();
+			});	
+			$('#cancelReminderButton').click(function (){				
 				app.View.renderReminders();
 			});		
 		}
+
+
+		app.Session.sendReminder = function (id,contact){
+			console.log("IN SEND REMINDER");
+			console.log(me+" "+id+" "+contact);
+			socket.emit('newReminder',{"usr1":me , "remId":id , "usr2":contact});
+		}
+
+		app.Logic.startTimer = function (){
+			setInterval(function(){
+				app.Logic.getLocation();},10000);
+		}
+
+		app.Logic.getLocation = function() {				  
+				  if (navigator.geolocation)
+				    	{
+				   		 navigator.geolocation.getCurrentPosition(app.Session.sendLocation);
+				    	}
+				  else{app.Logic.throwError('Sorry, your browser does not support geolocation');}	  
+		}
+
+		app.Session.sendLocation = function (position) {
+					console.log(position.coords.latitude+" "+position.coords.longitude);
+				  socket.emit('locationUpdate',{"usrId":me,"loc":{"usrlat":position.coords.latitude,"usrlong":position.coords.longitude}});	
+				  }
+		
+
 		
 window.onload = app.View.initialize();
 
+
+
+});
+
+
+socket.on('connected',function (data){
+	server=socket.id;
+	socket.emit('authenticated','Lets go');
+
+});
+
+
+//Alert that the reminder was successfully saved on the server.	
+socket.on('addedReminder',function (data) {
+	alert("Reminder Saved!");
+});
+
+socket.on('gotProximity',function (data){
+	alert(data);
+});
+
+//Alert when someone adds you in their reminder list.
+socket.on('watchingNotification',function (data){
+	//function call to notify user
+	alert(getusername(data)+' has just added a reminder for you.');
+});
+
+//Alert when the server finds your person in proximity
+socket.on('reminderTriggered', function (remId){
+	for(var i = 0; i < retrievedObject.length; i++) {
+			if (remId == retrievedObject[i].id) {
+			alert(retrievedObject[i].person + ' is close by and I wanted to remind about ' + retrievedObject[i].note);
+			break;
+		}					
+	}	
+	
 });
 
